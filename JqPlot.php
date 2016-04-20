@@ -117,7 +117,7 @@ class JqPlot extends Widget
     {
         // Looking for renderers
         foreach ($data as $k => $v) {
-            if ($k == 'renderer') {
+            if ($k == 'renderer' || $k == 'tickRenderer') {
                 $this->registerRendererJsFile($v);
             } elseif (is_array($v)) {
                 $this->registerRenderersRecursively($v);
