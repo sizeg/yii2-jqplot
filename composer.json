@@ -2,11 +2,9 @@
     "name": "sizeg/yii2-jqplot",
     "description": "Yii2 jqPlot widget renders charts and graphs based on jQuery Plotting Plugin",
     "require": {
-        "php": ">=5.4.0"
-    },
-	"require-dev": {
+        "php": ">=5.4.0",
 		"yiisoft/yii2": "*"
-	},
+    },
     "autoload": {
         "psr-4": {
             "sizeg\\jqplot\\": ""

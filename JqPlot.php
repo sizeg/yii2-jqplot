@@ -139,6 +139,14 @@ class JqPlot extends Widget
             $url = 'plugins/jqplot.' . lcfirst($name) . '.js';
         }
         
+        // Additional dependencies
+        if ($name == 'CanvasAxisLabelRenderer' || $name == 'CanvasAxisTickRenderer') {
+            $additionalUrl = 'plugins/jqplot.canvasTextRenderer.js';
+            if (!in_array($additionalUrl, Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js)) {
+                Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = $additionalUrl;
+            }
+        }
+        
         if (!in_array($url, Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js)) {
             Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = $url;
         }
