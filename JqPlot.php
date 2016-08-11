@@ -101,7 +101,7 @@ class JqPlot extends Widget
      */
     protected function registerJqPlotClientOptions($id)
     {
-        $this->registerRenderersRecursively($this->clientOptions);
+        $this->registerDependenciesRecursively($this->clientOptions);
 
         $data = Json::htmlEncode($this->data);
         $options = !empty($this->clientOptions) ? Json::htmlEncode($this->clientOptions) : '{}';
@@ -113,7 +113,7 @@ class JqPlot extends Widget
      * Find renderers and register their JS plugins
      * @param array $data
      */
-    public function registerRenderersRecursively($data)
+    public function registerDependenciesRecursively($data)
     {
         // Looking for renderers
         foreach ($data as $k => $v) {
@@ -122,7 +122,7 @@ class JqPlot extends Widget
             } elseif ($k == 'pointLabels' && isset($v['show']) && (boolean)$v['show']) {
                 Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.pointLabels.js';
             } elseif (is_array($v)) {
-                $this->registerRenderersRecursively($v);
+                $this->registerDependenciesRecursively($v);
             }
         }
 
