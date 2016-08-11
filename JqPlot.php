@@ -150,5 +150,7 @@ class JqPlot extends Widget
         if (!in_array($url, Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js)) {
             Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = $url;
         }
+
+        Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.pointLabels.js';
     }
 }
