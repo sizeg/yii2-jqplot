@@ -119,9 +119,9 @@ class JqPlot extends Widget
         foreach ($data as $k => $v) {
             if ($k == 'renderer' || $k == 'tickRenderer') {
                 $this->registerRendererJsFile($v);
-            } elseif ($k == 'pointLabels' && isset($v['show']) && (boolean)$v['show']) {
-                Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.pointLabels.js';
-            } elseif (is_array($v)) {
+            } elseif (is_array($v) && isset($v['show']) && (boolean)$v['show']) {
+                Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.'.$k.'.js';
+            }  elseif (is_array($v)) {
                 $this->registerDependenciesRecursively($v);
             }
         }
