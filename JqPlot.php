@@ -18,9 +18,9 @@ use yii\web\View;
  *     'data' => [[1, 2],[3,5.12],[5,13.1],[7,33.6],[9,85.9],[11,219.9]]
  * ]);
  * ```
- * 
+ *
  * The following example will render a bar chart:
- * 
+ *
  * ```php
  * echo sizeg\jqplot\JqPlot::widget([
  *     'data' => [
@@ -48,7 +48,7 @@ use yii\web\View;
  *     ]
  * ]);
  * ```
- * 
+ *
  * @see http://www.jqplot.com/
  * @author Dmitry Demin <sizemail@gmail.com>
  * @since 1.0.0-a
@@ -108,7 +108,7 @@ class JqPlot extends Widget
         $js = "jQuery('#" . $id . "')." . static::NAME . "(" . $data . ", " . $options . ")";
         $this->getView()->registerJs($js, View::POS_END);
     }
-    
+
     /**
      * Find renderers and register their JS plugins
      * @param array $data
@@ -119,8 +119,8 @@ class JqPlot extends Widget
         foreach ($data as $k => $v) {
             if ($k == 'renderer' || $k == 'tickRenderer') {
                 $this->registerRendererJsFile($v);
-            } elseif ($k == 'pointLabels' && isset($v['show']) && (boolean)$v['show']) {
-                Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.pointLabels.js';
+            } elseif (is_array($v) && isset($v['show']) && (boolean)$v['show']) {
+                Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.' . $k . '.js';
             } elseif (is_array($v)) {
                 $this->registerDependenciesRecursively($v);
             }
@@ -140,7 +140,7 @@ class JqPlot extends Widget
             list($jqPrefix, $jqPlot, $name) = explode('.', $renderer);
             $url = 'plugins/jqplot.' . lcfirst($name) . '.js';
         }
-        
+
         // Additional dependencies
         if ($name == 'CanvasAxisLabelRenderer' || $name == 'CanvasAxisTickRenderer') {
             $additionalUrl = 'plugins/jqplot.canvasTextRenderer.js';
@@ -148,7 +148,7 @@ class JqPlot extends Widget
                 Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = $additionalUrl;
             }
         }
-        
+
         if (!in_array($url, Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js)) {
             Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = $url;
         }
