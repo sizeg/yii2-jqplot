@@ -119,6 +119,8 @@ class JqPlot extends Widget
         foreach ($data as $k => $v) {
             if ($k == 'renderer' || $k == 'tickRenderer') {
                 $this->registerRendererJsFile($v);
+            } elseif ($k == 'pointLabels' && isset($v['show']) && (boolean)$v['show']) {
+                Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.pointLabels.js';
             } elseif (is_array($v)) {
                 $this->registerRenderersRecursively($v);
             }
@@ -150,7 +152,5 @@ class JqPlot extends Widget
         if (!in_array($url, Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js)) {
             Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = $url;
         }
-
-        Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.pointLabels.js';
     }
 }
