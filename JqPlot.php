@@ -6,6 +6,7 @@ use Yii;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\jui\Widget;
+use yii\web\JsExpression;
 use yii\web\View;
 
 /**
@@ -66,6 +67,17 @@ class JqPlot extends Widget
      */
     public $data = [];
 
+    public $enablePlugins = true;
+
+    private $_plugins = [
+        'canvasOverlay',
+        'cursor',
+        'dragable',
+        'highlighter',
+        'pointLabels',
+        'trendline'
+    ];
+
     /**
      * Initializes the widget
      */
@@ -105,7 +117,7 @@ class JqPlot extends Widget
 
         $data = Json::htmlEncode($this->data);
         $options = !empty($this->clientOptions) ? Json::htmlEncode($this->clientOptions) : '{}';
-        $js = "jQuery('#" . $id . "')." . static::NAME . "(" . $data . ", " . $options . ")";
+        $js = "jQuery('#" . $id . "')." . static::NAME . "(" . $data . ", " . $options . ");";
         $this->getView()->registerJs($js, View::POS_END);
     }
 
@@ -117,16 +129,23 @@ class JqPlot extends Widget
     {
         // Looking for renderers
         foreach ($data as $k => $v) {
-            if ($k == 'renderer' || $k == 'tickRenderer') {
+            if ($k == 'renderer' || $k == 'tickRenderer' || $k == 'labelRenderer') {
                 $this->registerRendererJsFile($v);
-            } elseif (is_array($v) && isset($v['show']) && (boolean)$v['show']) {
+            } elseif (in_array($k, $this->_plugins) && $this->isPluginsEnabled()) {
                 Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.' . $k . '.js';
             } elseif (is_array($v)) {
                 $this->registerDependenciesRecursively($v);
             }
         }
-
     }
+
+    public function isPluginsEnabled()
+    {
+        return !empty($this->clientOptions)
+        && isset($this->clientOptions['enablePlugins'])
+        && (boolean)$this->clientOptions['enablePlugins'];
+    }
+
 
     /**
      * Registers additional jqPlot JS plugins
@@ -134,10 +153,18 @@ class JqPlot extends Widget
      */
     public function registerRendererJsFile($renderer)
     {
+        if (!($renderer instanceof JsExpression)) {
+            return;
+        }
         if (strpos($renderer, 'BezierCurveRenderer') !== false) {
             $url = 'plugins/jqplot.BezierCurveRenderer.js';
-        } else {
+        } elseif (strpos($renderer, 'OHLCRenderer') !== false) {
+            $url = 'plugins/jqplot.ohlcRenderer.js';
+        }else {
             list($jqPrefix, $jqPlot, $name) = explode('.', $renderer);
+            if (!in_array($jqPrefix, ['$', 'jQuery']) || $jqPlot == 'jqplot') {
+                return;
+            }
             $url = 'plugins/jqplot.' . lcfirst($name) . '.js';
         }
 
