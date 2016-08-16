@@ -67,8 +67,6 @@ class JqPlot extends Widget
      */
     public $data = [];
 
-    public $enablePlugins = true;
-
     private $_plugins = [
         'canvasOverlay',
         'cursor',
