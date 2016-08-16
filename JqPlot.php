@@ -49,6 +49,15 @@ use yii\web\View;
  *     ]
  * ]);
  * ```
+ * Using Plugins
+ * You can use jqPlot plugins (that is, plugins to the jqPlot plugin)
+ * by including them in your html after you include the jqPlot plugin.
+ * Here is how to include the log axis plugin:
+ * Important note: For jqplot builds r529 and above (0.9.7r529 and higher),
+ * you must explicitly enable plugins via either the { show: true } plugin option to the plot or by using
+ * the $.jqplot.config.enablePlugins = true; config options set on the page before plot creation.
+ * Only plugins that can be immediately active upon loading are affected.
+ * This includes non-renderer plugins like cursor, dragable, highlighter, and trendline.
  *
  * @see http://www.jqplot.com/
  * @author Dmitry Demin <sizemail@gmail.com>
@@ -76,6 +85,8 @@ class JqPlot extends Widget
         'trendline'
     ];
 
+    public $enablePlugins = true;
+
     /**
      * Initializes the widget
      */
@@ -102,7 +113,14 @@ class JqPlot extends Widget
     {
         JqPlotAsset::register($this->getView());
         $this->registerClientEvents(static::NAME, $this->options['id']);
+        $this->registerPluginsState();
         $this->registerJqPlotClientOptions($this->options['id']);
+    }
+
+    protected function registerPluginsState()
+    {
+        $js = 'jQuery.jqplot.config.enablePlugins = '.($this->enablePlugins ? 'true' : 'false').';';
+        $this->getView()->registerJs($js, View::POS_END);
     }
 
     /**
@@ -129,21 +147,13 @@ class JqPlot extends Widget
         foreach ($data as $k => $v) {
             if ($k == 'renderer' || $k == 'tickRenderer' || $k == 'labelRenderer') {
                 $this->registerRendererJsFile($v);
-            } elseif (in_array($k, $this->_plugins) && $this->isPluginsEnabled()) {
+            } elseif (in_array($k, $this->_plugins) && (boolean)$this->enablePlugins) {
                 Yii::$app->assetManager->bundles[JqPlotAsset::className()]->js[] = 'plugins/jqplot.' . $k . '.js';
             } elseif (is_array($v)) {
                 $this->registerDependenciesRecursively($v);
             }
         }
     }
-
-    public function isPluginsEnabled()
-    {
-        return !empty($this->clientOptions)
-        && isset($this->clientOptions['enablePlugins'])
-        && (boolean)$this->clientOptions['enablePlugins'];
-    }
-
 
     /**
      * Registers additional jqPlot JS plugins
@@ -158,9 +168,9 @@ class JqPlot extends Widget
             $url = 'plugins/jqplot.BezierCurveRenderer.js';
         } elseif (strpos($renderer, 'OHLCRenderer') !== false) {
             $url = 'plugins/jqplot.ohlcRenderer.js';
-        }else {
+        } else {
             list($jqPrefix, $jqPlot, $name) = explode('.', $renderer);
-            if (!in_array($jqPrefix, ['$', 'jQuery']) || $jqPlot == 'jqplot') {
+            if (!in_array($jqPrefix, ['$', 'jQuery']) || $jqPlot != 'jqplot') {
                 return;
             }
             $url = 'plugins/jqplot.' . lcfirst($name) . '.js';
